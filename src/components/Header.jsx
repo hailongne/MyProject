@@ -1,22 +1,18 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLanguageDropdown, setIsLanguageDropdown] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { user, logout } = useAuth();
 
-  // Thông tin khách hàng (có thể lấy từ context hoặc props sau)
-  const customer = {
-    name: 'Nguyễn Văn A'
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/login';
   };
-
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'vi', name: 'Tiếng Việt' },
-    { code: 'ko', name: 'Korea' }
-  ];
 
   // Đóng menu dropdown khi click bên ngoài
   useEffect(() => {
@@ -78,38 +74,6 @@ export default function Header() {
             <span className="absolute -top-2 -right-1 bg-red-600 text-white text-xs rounded-full w-3 h-3 flex items-center justify-center font-bold">0</span>
           </Link>
 
-          {/* Icon Ngôn ngữ */}
-          <div className="relative z-40" onClick={(e) => e.stopPropagation()}>
-            <button 
-              onClick={() => toggleLanguageDropdown()}
-              className="p-0 bg-transparent border-none cursor-pointer hover:opacity-70 transition flex-shrink-0"
-            >
-              <img 
-                src="/images/iconlanguage.png" 
-                alt="Ngôn ngữ" 
-                className="h-4 md:h-5 w-auto"
-              />
-            </button>
-
-            {/* Language Dropdown Menu */}
-            {isLanguageDropdown && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 transition text-sm"
-                    onClick={() => {
-                      console.log('Selected language:', lang.code);
-                      setIsLanguageDropdown(false);
-                    }}
-                  >
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Customer Info & Dropdown */}
           <div className="relative z-40" ref={dropdownRef} onClick={(e) => e.stopPropagation()}>
             <button 
@@ -119,23 +83,25 @@ export default function Header() {
               <span className="hidden md:inline text-sm font-medium text-gray-700">
                 <img src="/images/iconiconicon.png" alt="logo" className="w-4 md:w-5 h-4 md:h-5" />
               </span>
-              <span className="hidden sm:inline text-xs md:text-sm font-medium text-gray-700">{customer.name}</span>
+              <span className="hidden sm:inline text-xs md:text-sm font-medium text-gray-700">{user?.name || 'Khách'}</span>
               <span className="hidden sm:inline text-xs md:text-sm font-medium text-gray-700">☰</span>
             </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50">
-                <Link 
-                  to="/profile" 
-                  onClick={() => setIsDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition text-sm"
-                >
-                  <svg className="w-4 h-4 text-black flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 10a3 3 0 100-6 3 3 0 000 6zm0 1.646a4.5 4.5 0 00-4.446 3.854H5C6.1 15.951 7.967 17 10 17s3.9-1.049 4.446-2.5h-.896a4.5 4.5 0 00-4.446-3.854z" />
-                  </svg>
-                  <span>Thông tin</span>
-                </Link>
+                {user ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition text-sm"
+                    >
+                      <svg className="w-4 h-4 text-black flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 10a3 3 0 100-6 3 3 0 000 6zm0 1.646a4.5 4.5 0 00-4.446 3.854H5C6.1 15.951 7.967 17 10 17s3.9-1.049 4.446-2.5h-.896a4.5 4.5 0 00-4.446-3.854z" />
+                      </svg>
+                      <span>Thông tin</span>
+                    </Link>
                 <Link 
                   to="/" 
                   onClick={() => setIsDropdownOpen(false)}
@@ -166,8 +132,8 @@ export default function Header() {
                   </svg>
                   <span>Điều khoản và điều kiện</span>
                 </Link>
-                <button 
-                  onClick={() => setIsDropdownOpen(false)}
+                <button
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-gray-50 transition text-sm font-medium"
                 >
                   <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -175,6 +141,25 @@ export default function Header() {
                   </svg>
                   <span>Đăng xuất</span>
                 </button>
+                </>
+                ) : (
+                  <div>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition text-sm"
+                  >
+                    Đăng nhập
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition text-sm"
+                  >
+                    Đăng ký
+                  </Link>
+                </div>
+                )}
               </div>
             )}
           </div>
@@ -246,7 +231,7 @@ export default function Header() {
               <span className="text-gray-400">→</span>
             </Link>
 
-            <button onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between w-full px-4 py-3 text-red-600 hover:bg-gray-50 transition border-b font-medium text-sm">
+            <button onClick={handleLogout} className="flex items-center justify-between w-full px-4 py-3 text-red-600 hover:bg-gray-50 transition border-b font-medium text-sm">
               <span className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm7.707 1.293a1 1 0 00-1.414 1.414L9.586 9l-1.293 1.293a1 1 0 101.414 1.414L11 10.414l1.293 1.293a1 1 0 001.414-1.414L12.414 10l1.293-1.293a1 1 0 00-1.414-1.414L11 8.586 9.707 7.293z" clipRule="evenodd" />
