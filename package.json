@@ -12,10 +12,7 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "autoprefixer": "^10.4.22",
-<<<<<<< HEAD
     "axios": "^1.13.2",
-=======
->>>>>>> f6e023a424b970e415bfc2991f480fd6308a7353
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

@@ -28,6 +28,20 @@ export function AuthProvider({ children }) {
       password,
     });
     setUser(res.data.user);
+
+    // Check for pending booking data
+    const pendingData = localStorage.getItem('pendingBookingData');
+    if (pendingData) {
+      localStorage.removeItem('pendingBookingData');
+      // Extract product id from bookingData
+      const bookingData = JSON.parse(pendingData);
+      // Assume product has id field or extract from product string
+      const productId = bookingData.productId || '1'; // fallback
+      localStorage.setItem('restoreBookingData', pendingData);
+      setTimeout(() => {
+        window.location.href = `/product/${productId}?place=true`;
+      }, 100);
+    }
   };
 
   const register = async (name, email, password, role = 'user') => {
@@ -39,6 +53,16 @@ export function AuthProvider({ children }) {
       role,
     });
     setUser(res.data.user);
+
+    // Check for pending booking data
+    const pendingData = localStorage.getItem('pendingBookingData');
+    if (pendingData) {
+      localStorage.removeItem('pendingBookingData');
+      setTimeout(() => {
+        window.location.href = '/checkout';
+        sessionStorage.setItem('bookingData', pendingData);
+      }, 100);
+    }
   };
 
   const logout = async () => {
