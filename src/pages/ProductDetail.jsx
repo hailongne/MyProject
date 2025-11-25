@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+  const { user } = useAuth();
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+
+  useEffect(() => {
+    if (user !== null) setHasCheckedAuth(true);
+  }, [user]);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const shouldPlace = urlParams.get('place') === 'true';
+
   // Form states
   const [product, setProduct] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedType, setSelectedType] = useState('ngoai-tinh'); 
+  const [selectedType, setSelectedType] = useState('ngoai-tinh');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [adults, setAdults] = useState(0);
@@ -28,6 +40,27 @@ export default function ProductDetail() {
     }
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (shouldPlace && product) {
+      const restoreData = localStorage.getItem('restoreBookingData');
+      if (restoreData) {
+        const bookingData = JSON.parse(restoreData);
+        setSelectedDate(bookingData.date || '');
+        setSelectedType(bookingData.type || 'ngoai-tinh');
+        setSelectedArea(bookingData.area || '');
+        setSelectedTime(bookingData.time || '');
+        setAdults(bookingData.adults || 0);
+        setChildren(bookingData.children || 0);
+        setSeniors(bookingData.seniors || 0);
+        localStorage.removeItem('restoreBookingData');
+        // Remove query param
+        const url = new URL(window.location);
+        url.searchParams.delete('place');
+        window.history.replaceState({}, '', url.pathname);
+      }
+    }
+  }, [shouldPlace, product]);
 
   if (!product) return <div className="p-6">Đang tải sản phẩm...</div>;
 
@@ -49,16 +82,8 @@ export default function ProductDetail() {
   const minDate = getMinDate();
 
   const handleAddToCart = () => {
-    if (totalTickets === 0) {
-      alert('Vui lòng chọn ít nhất 1 vé');
-      return;
-    }
-    if (!selectedDate || !selectedArea || !selectedTime) {
-      alert('Vui lòng chọn ngày, khu vực và khung giờ');
-      return;
-    }
-
     const bookingData = {
+      productId: id,
       product: product.title,
       productImage: product.image,
       productLocation: product.location,
@@ -75,6 +100,22 @@ export default function ProductDetail() {
       pricePerChild,
       pricePerSenior,
     };
+
+    if (!user) {
+      // Save booking data and show login modal
+      localStorage.setItem('pendingBookingData', JSON.stringify(bookingData));
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (totalTickets === 0) {
+      alert('Vui lòng chọn ít nhất 1 vé');
+      return;
+    }
+    if (!selectedDate || !selectedArea || !selectedTime) {
+      alert('Vui lòng chọn ngày, khu vực và khung giờ');
+      return;
+    }
 
     navigate('/checkout', { state: bookingData });
   };
@@ -166,7 +207,7 @@ export default function ProductDetail() {
                     {product.discount}
                   </div>
                 </div>
-                
+
                 {/* Info */}
                 <div className="flex-1 flex flex-col justify-between">
                   <h1 className="text-[1.2rem] font-bold text-gray-800 line-clamp-2">
@@ -184,7 +225,7 @@ export default function ProductDetail() {
                     {/* Short Description */}
                     <p className="text-xs text-gray-600 line-clamp-2">
                       {product.description.substring(0, 80)}...
-                      <button 
+                      <button
                         onClick={() => setExpandDescription(true)}
                         className="text-orange-500 hover:text-orange-600 font-semibold ml-1"
                       >
@@ -396,6 +437,45 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+            <div className="mb-6">
+              <svg className="w-16 h-16 mx-auto text-orange-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Cần đăng nhập</h3>
+            <p className="text-gray-600 mb-6">
+              Bạn cần đăng nhập để tiến hành đặt vé.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition"
+              >
+                Đăng nhập
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition"
+              >
+                Đăng ký tài khoản mới
+              </button>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="w-full text-gray-500 hover:text-gray-700 transition"
+              >
+                Quay lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
