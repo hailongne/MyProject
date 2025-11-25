@@ -13,17 +13,15 @@ export default function Header() {
     window.location.href = '/login';
   };
 
-  // Đóng tất cả dropdown khi click bên ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-        setIsMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -53,16 +51,17 @@ export default function Header() {
             <button
               onClick={() => {
                 setIsDropdownOpen(!isDropdownOpen);
-                setIsMenuOpen(false); // đóng menu mobile nếu đang mở
+                setIsMenuOpen(false);
               }}
               className="flex items-center gap-2 hover:opacity-70 transition"
             >
               <img src="/images/iconiconicon.png" className="w-5 h-5" />
-              <span className="text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Khách'}</span>
+              <span className="text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Đăng nhập/ Đăng ký'}</span>
               <span className="text-sm hidden sm:inline">☰</span>
             </button>
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
+              <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg py-2"
+                   onClick={(e) => e.stopPropagation()}>
                 {user ? (
                   <>
                     <Link to="/profile" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Thông tin</Link>
@@ -80,6 +79,9 @@ export default function Header() {
                   <>
                     <Link to="/login" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Đăng nhập</Link>
                     <Link to="/register" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Đăng ký</Link>
+                    <Link to="/" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Giới thiệu</Link>
+                    <Link to="/" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Hỗ trợ</Link>
+                    <Link to="/" className="block px-4 py-2 text-black text-sm hover:bg-gray-50">Điều khoản</Link>
                   </>
                 )}
               </div>
@@ -90,11 +92,13 @@ export default function Header() {
           <button
             onClick={() => {
               setIsMenuOpen(!isMenuOpen);
-              setIsDropdownOpen(false); // đóng user dropdown nếu đang mở
+              setIsDropdownOpen(false); 
             }}
-            className="lg:hidden text-gray-700 text-2xl hover:opacity-70"
+            className="lg:hidden flex items-center gap-2 text-gray-700 hover:opacity-70"
           >
-            ☰
+            <img src="/images/iconiconicon.png" alt="user" className="w-5 h-5" />
+            <span className="text-sm font-medium">{user?.name || 'wellcome'}</span>
+            <span className="text-2xl">☰</span>
           </button>
 
           {/* PC BUTTONS */}
@@ -107,12 +111,36 @@ export default function Header() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white fixed inset-0 top-16 z-40 overflow-y-auto">
           <nav className="flex flex-col">
-            <Link to="/profile" className="px-4 py-3 text-black border-b hover:bg-gray-50">Chỉnh sửa thông tin</Link>
-            <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Giới thiệu</Link>
-            <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Hỗ trợ</Link>
-            <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Điều khoản</Link>
-            <button onClick={handleLogout} className="px-4 py-3 text-left text-red-600 border-b hover:bg-gray-50">Đăng xuất</button>
+            {user ? (
+              <>
+                <Link to="/profile" className="px-4 py-3 text-black border-b hover:bg-gray-50">
+                  Chỉnh sửa thông tin
+                </Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Giới thiệu</Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Hỗ trợ</Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Điều khoản</Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-3 text-left text-red-600 border-b hover:bg-gray-50"
+                >
+                  Đăng xuất
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="px-4 py-3 text-black border-b hover:bg-gray-50">
+                  Đăng nhập
+                </Link>
+                <Link to="/register" className="px-4 py-3 text-black border-b hover:bg-gray-50">
+                  Đăng ký
+                </Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Giới thiệu</Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Hỗ trợ</Link>
+                <Link to="/" className="px-4 py-3 text-black border-b hover:bg-gray-50">Điều khoản</Link>
+              </>
+            )}
           </nav>
+
           <div className="px-4 py-6 mt-4 border-t">
             <p className="text-center text-gray-600 text-xs font-medium mb-3">Get Sun Paradise App</p>
             <div className="flex gap-2 justify-between">
