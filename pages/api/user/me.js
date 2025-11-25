@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { users } from '../../lib/users';
 
 export default function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5555');
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');

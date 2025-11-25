@@ -5,10 +5,11 @@ import { users } from '../../lib/users';
 
 export default async function handler(req, res) {
   // Set CORS headers for all requests
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5555');
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
